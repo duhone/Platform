@@ -49,5 +49,10 @@ if(IncludeTests)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  
         "${PROJECT_SOURCE_DIR}/../tests/content/testdll.dll"
         $<TARGET_FILE_DIR:platform_tests>)
+		
+	add_custom_command(TARGET platform_tests POST_BUILD        
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
+        "${PROJECT_SOURCE_DIR}/../tests/content/test.txt"
+        $<TARGET_FILE_DIR:platform_tests>)
 
 endif()
