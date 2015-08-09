@@ -10,11 +10,11 @@ namespace CR
 		class IOCPPort : public IIOCPort
 		{
 		public:
-			IOCPPort(HANDLE a_handle, std::function<void(OVERLAPPED*)> a_completion);
+			IOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion);
 			virtual ~IOCPPort() = default;
-			void RunContinuation(OVERLAPPED* a_result) { m_completion(a_result); }
+			void RunContinuation(OVERLAPPED* a_result, std::size_t a_msgSize) { m_completion(a_result, a_msgSize); }
 		private:
-			std::function<void(OVERLAPPED*)> m_completion;
+			IIOCPort::CompletionCallbackT m_completion;
 		};
 
 		//Doesn't scale past one thread at the moment. would require some redesign to do so.
@@ -37,7 +37,7 @@ namespace CR
 
 using namespace CR::Platform;
 
-IOCPPort::IOCPPort(HANDLE a_handle, std::function<void(OVERLAPPED*)> a_completion) : m_completion(std::move(a_completion))
+IOCPPort::IOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion) : m_completion(std::move(a_completion))
 {
 	IOCPThread::Instance().RegisterIOCPPort(this, a_handle);
 }
@@ -62,7 +62,7 @@ void IOCPThread::RunIOCPThread()
 	OVERLAPPED* msg;
 	while(GetQueuedCompletionStatus(m_iocpHandle, &msgSize, &completionKey, &msg, INFINITE))
 	{
-		((IOCPPort*)completionKey)->RunContinuation(msg);
+		((IOCPPort*)completionKey)->RunContinuation(msg, msgSize);
 	}
 }
 
@@ -71,7 +71,7 @@ void IOCPThread::RegisterIOCPPort(IOCPPort* a_port, HANDLE a_handle)
 	CreateIoCompletionPort(a_handle, m_iocpHandle, (ULONG_PTR)a_port, 1);
 }
 
-std::unique_ptr<IIOCPort> CR::Platform::OpenIOCPPort(HANDLE a_handle, std::function<void(OVERLAPPED*)> a_completion)
+std::unique_ptr<IIOCPort> CR::Platform::OpenIOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion)
 {
 	return std::make_unique<IOCPPort>(a_handle, std::move(a_completion));
 }
