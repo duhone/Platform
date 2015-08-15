@@ -3,6 +3,7 @@ project (Platform)
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/../../core/build" "${PROJECT_SOURCE_DIR}/../../core_build")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/catch")
+include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/boost")
 include_directories("${PROJECT_SOURCE_DIR}/../../core/inc")
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")

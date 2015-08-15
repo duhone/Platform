@@ -14,7 +14,7 @@ namespace CR
 		public:
 			PipeClient(HANDLE a_pipeHandle, IPipeClient::MsgHandler&& a_msgHandler);
 			virtual ~PipeClient();
-			void SendPipeMessage(void* a_msg, size_t a_msgSize) override;
+			void SendPipeMessage(const void* a_msg, size_t a_msgSize) override;
 		private:
 			void RunMsgHandler();
 
@@ -43,13 +43,17 @@ PipeClient::~PipeClient()
 		m_msgThread.join();
 }
 
-void PipeClient::SendPipeMessage(void* a_msg, size_t a_msgSize)
+void PipeClient::SendPipeMessage(const void* a_msg, size_t a_msgSize)
 {
 	DWORD bytesWritten = 0;
 	assert(a_msgSize < 4_Kb); //arbitrary, but if larger than this might want to switch to an async implementation
 	BOOL result = WriteFile(m_pipeHandle, a_msg, static_cast<DWORD>(a_msgSize), &bytesWritten, nullptr);
 	if(!result || bytesWritten != a_msgSize)
-		throw std::runtime_error("Failed to write message");
+	{
+		auto error = GetLastError();
+		if(error != ERROR_OPERATION_ABORTED && error != ERROR_NO_DATA)
+			throw std::runtime_error("Failed to write message");
+	}
 }
 
 void PipeClient::RunMsgHandler()

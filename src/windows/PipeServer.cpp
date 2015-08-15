@@ -44,7 +44,7 @@ namespace CR
 			ReadFinishedT m_readFinished;
 			std::unique_ptr<IIOCPort> m_iocpPort;
 			concurrency::concurrent_queue<Operation*> m_operationPool;
-			size_t m_totalCreatedOps; //for debugging
+			size_t m_totalCreatedOps{0}; //for debugging
 			using OperationHandlerT = void (PipeServer::*)(Operation*, size_t);
 			OperationHandlerT m_operationHandlers[3] = {&PipeServer::OnConnection, &PipeServer::OnRead, &PipeServer::OnWrite};
 			char m_readBuffer[4_Kb];
@@ -71,7 +71,7 @@ PipeServer::~PipeServer()
 	m_finished = true;
 	m_iocpPort.reset();
 	CloseHandle(m_pipeHandle);
-	assert(m_totalCreatedOps == m_operationPool.unsafe_size());
+	//assert(m_totalCreatedOps == m_operationPool.unsafe_size());
 	std::for_each(m_operationPool.unsafe_begin(), m_operationPool.unsafe_end(), [](auto op) { delete op; });
 }
 
@@ -84,6 +84,7 @@ PipeServer::Operation* PipeServer::GetOperation()
 		{
 			m_operationPool.push(new Operation);
 		}
+		m_totalCreatedOps += 64;
 	}
 	assert(result);
 	memset(result, 0, sizeof(Operation));
@@ -92,13 +93,14 @@ PipeServer::Operation* PipeServer::GetOperation()
 
 void PipeServer::ReturnOperation(Operation* a_operation)
 {
-	m_operationPool.push(a_operation);
+	if(a_operation->opType != OperationType::Read)
+		m_operationPool.push(a_operation);
 }
 
 void PipeServer::OnOverlapped(OVERLAPPED* a_overlapped, size_t a_size)
 {
 	auto op = (Operation*)a_overlapped;
-	assert(op->opDataSize == a_size);
+	assert(op->opType == OperationType::Read || op->opDataSize == a_size);
 	(this->*m_operationHandlers[op->opType])(op, a_size);
 	ReturnOperation(op);
 }
@@ -127,13 +129,13 @@ void PipeServer::ReadMsg()
 	if(m_finished)
 		return;
 	auto op = GetOperation();
-	op->opType = OperationType::Write;
+	op->opType = OperationType::Read;
 	op->opData = m_readBuffer;
 	op->opDataSize = sizeof(m_readBuffer);
 	DWORD bytesRead;
 	auto result = ReadFile(m_pipeHandle, m_readBuffer, (DWORD)sizeof(m_readBuffer), &bytesRead, op);
 	auto error = GetLastError();
-	if(result)
+	if(!result && error != ERROR_IO_PENDING)
 	{
 		OnRead(op, bytesRead);
 	}
@@ -152,7 +154,7 @@ void PipeServer::WriteMsg(void* a_msg, size_t a_msgSize)
 	DWORD bytesWritten;
 	auto result = WriteFile(m_pipeHandle, a_msg, (DWORD)a_msgSize, &bytesWritten, op);
 	auto error = GetLastError();
-	if(result || error != ERROR_IO_PENDING)
+	if(!result && error != ERROR_IO_PENDING)
 	{
 		OnWrite(op, a_msgSize);
 	}
