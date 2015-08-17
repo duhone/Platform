@@ -135,7 +135,7 @@ void PipeServer::ReadMsg()
 	DWORD bytesRead;
 	auto result = ReadFile(m_pipeHandle, m_readBuffer, (DWORD)sizeof(m_readBuffer), &bytesRead, op);
 	auto error = GetLastError();
-	if(!result && error != ERROR_IO_PENDING)
+	if(result || (!result && error != ERROR_IO_PENDING))
 	{
 		OnRead(op, bytesRead);
 	}

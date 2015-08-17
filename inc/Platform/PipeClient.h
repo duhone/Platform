@@ -20,9 +20,9 @@ namespace CR
 				static_assert(std::is_standard_layout<MsgT>::value, "Messages should be pod types");
 				SendPipeMessage(&a_msg, sizeof(a_msg));
 			}
-			using MsgHandler = std::function<void(void*, size_t)>;
+			using MsgHandlerT = std::function<void(void*, size_t)>;
 		};
 
-		std::unique_ptr<IPipeClient> CreatePipeClient(const char* a_name, IPipeClient::MsgHandler a_msgHandler);
+		std::unique_ptr<IPipeClient> CreatePipeClient(const char* a_name, IPipeClient::MsgHandlerT a_msgHandler);
 	}
 }
