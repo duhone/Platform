@@ -107,6 +107,7 @@ void PipeServer::OnOverlapped(OVERLAPPED* a_overlapped, size_t a_size)
 
 void PipeServer::OnConnection(Operation* a_operation, size_t)
 {
+	a_operation;
 	assert(a_operation->opType == OperationType::Connection);
 	ReadMsg();
 }
