@@ -58,7 +58,7 @@ IOCPThread::~IOCPThread()
 void IOCPThread::RunIOCPThread()
 {
 	DWORD msgSize;
-	unsigned long long completionKey;
+	ULONG_PTR completionKey;
 	OVERLAPPED* msg;
 	while(GetQueuedCompletionStatus(m_iocpHandle, &msgSize, &completionKey, &msg, INFINITE))
 	{

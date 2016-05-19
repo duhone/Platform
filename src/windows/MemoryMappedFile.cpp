@@ -48,5 +48,5 @@ std::unique_ptr<IMemoryMappedFile> CR::Platform::OpenMMapFile(const char* a_file
 		return nullptr;
 	if(fileSize.QuadPart == 0)
 		return nullptr;
-	return std::make_unique<MemoryMappedFile>(handle, fileSize.QuadPart);
+	return std::make_unique<MemoryMappedFile>(handle, static_cast<size_t>(fileSize.QuadPart));
 }
