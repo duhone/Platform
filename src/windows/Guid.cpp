@@ -1,5 +1,5 @@
-#include "Guid.h"
-#include <Window.h>
+#include "Platform/Guid.h"
+#include <Platform/Window.h>
 #include <objbase.h>
 
 CR::Core::Guid CR::Platform::CreateGuid()

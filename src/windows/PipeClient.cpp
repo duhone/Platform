@@ -1,8 +1,8 @@
-#include "PipeClient.h"
+#include "Platform/PipeClient.h"
 #include <Windows.h>
 #include <stdexcept>
 #include <cassert>
-#include <core\literals.h>
+#include <core/literals.h>
 #include <thread>
 
 namespace CR

@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "SharedLibrary.h"
+#include "Platform/SharedLibrary.h"
 #include <functional>
 //test.dll is a dll that exports 2 functions, GetTestValue and SetTestValue. These functions get and set 
 //a global variable in the dll. Code for this dll not included but it is trivial to implement.

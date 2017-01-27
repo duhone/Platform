@@ -1,9 +1,9 @@
-#include "Window.h"
+#include "Platform/Window.h"
 #include <Windows.h>
 #include <thread>
 #include <string>
 #include <unordered_map>
-#include <core\Locked.h>
+#include <core/Locked.h>
 
 namespace CR
 {

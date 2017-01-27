@@ -1,4 +1,4 @@
-#include "SharedMemory.h"
+#include "Platform/SharedMemory.h"
 #include <Windows.h>
 
 namespace CR

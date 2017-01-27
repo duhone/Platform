@@ -1,5 +1,5 @@
-#include "Event.h"
-#include "windows.h"
+#include "Platform/Event.h"
+#include <windows.h>
 
 namespace CR
 {

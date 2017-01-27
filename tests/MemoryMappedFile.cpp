@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "MemoryMappedFile.h"
-#include "PathUtils.h"
+#include "Platform/MemoryMappedFile.h"
+#include "Platform/PathUtils.h"
 
 TEST_CASE("memory mapped files", "")
 {

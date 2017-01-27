@@ -1,4 +1,4 @@
-#include "SharedLibrary.h"
+#include "Platform/SharedLibrary.h"
 #include <windows.h>
 
 namespace CR

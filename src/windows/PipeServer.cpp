@@ -1,7 +1,7 @@
-#include "PipeServer.h"
-#include <Window.h>
+#include "Platform/PipeServer.h"
+#include "Platform/Window.h"
 #include "IOCP.h"
-#include <core\literals.h>
+#include <core/literals.h>
 #include <concurrent_queue.h>
 #include <cassert>
 #include <algorithm>
