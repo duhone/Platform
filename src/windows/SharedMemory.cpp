@@ -13,11 +13,11 @@ namespace CR
 
 			//follow stl naming convention for compatibility with non member data/size
 			std::size_t size() override;
-			uint8_t* data() override;
+			uchar* data() override;
 		private:
 			HANDLE m_memoryHandle;
 			size_t m_size{0};
-			uint8_t* m_data{nullptr};
+			uchar* m_data{nullptr};
 		};
 	}
 }
@@ -26,7 +26,7 @@ using namespace CR::Platform;
 
 SharedMemory::SharedMemory(HANDLE a_handle, size_t a_size) : m_memoryHandle(a_handle), m_size(a_size)
 {
-	m_data = (uint8_t*)MapViewOfFile(m_memoryHandle, FILE_MAP_ALL_ACCESS, 0, 0, m_size);
+	m_data = (uchar*)MapViewOfFile(m_memoryHandle, FILE_MAP_ALL_ACCESS, 0, 0, m_size);
 }
 
 SharedMemory::~SharedMemory()
@@ -39,7 +39,7 @@ std::size_t SharedMemory::size()
 {
 	return m_size;
 }
-uint8_t* SharedMemory::data()
+uchar* SharedMemory::data()
 {
 	return m_data;
 }

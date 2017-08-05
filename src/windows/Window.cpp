@@ -12,12 +12,12 @@ namespace CR
 		class Window : public IWindow
 		{
 		public:
-			Window(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, OnDestroyT a_onDestroy);
+			Window(const char* a_windowTitle, uint a_width, uint a_height, OnDestroyT a_onDestroy);
 			virtual ~Window(); 
 			void Destroy() override;
 			void OnDestroy();
 		private:
-			void MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height);
+			void MyCreateWindow(const char* a_windowTitle, uint a_width, uint a_height);
 			void RunMsgLoop();
 
 			HWND m_HWND{0};
@@ -52,7 +52,7 @@ namespace
 	}
 }
 
-Window::Window(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, OnDestroyT a_onDestroy) :
+Window::Window(const char* a_windowTitle, uint a_width, uint a_height, OnDestroyT a_onDestroy) :
 	m_onDestroy(std::move(a_onDestroy))
 {
 	m_thread = std::thread([this, windowTitle = std::string{a_windowTitle}, a_width, a_height]() {
@@ -71,7 +71,7 @@ Window::~Window()
 		m_thread.join();
 }
 
-void Window::MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height)
+void Window::MyCreateWindow(const char* a_windowTitle, uint a_width, uint a_height)
 {
 	// Initialize the window class.
 	WNDCLASSEX windowClass = {0};
@@ -131,7 +131,7 @@ void Window::OnDestroy()
 	m_onDestroy();
 }
 
-std::unique_ptr<IWindow> CR::Platform::CRCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, IWindow::OnDestroyT a_onDestroy)
+std::unique_ptr<IWindow> CR::Platform::CRCreateWindow(const char* a_windowTitle, uint a_width, uint a_height, IWindow::OnDestroyT a_onDestroy)
 {
 	return std::make_unique<Window>(a_windowTitle, a_width, a_height, a_onDestroy);
 }

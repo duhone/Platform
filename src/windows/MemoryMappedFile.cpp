@@ -13,12 +13,12 @@ namespace CR
 			MemoryMappedFile(HANDLE a_fileHandle, std::size_t a_fileSize);
 			virtual ~MemoryMappedFile();
 
-			uint8_t* data() override { return m_data; }
+			uchar* data() override { return m_data; }
 			std::size_t size() override { return m_fileSize; }
 		private:
 			HANDLE m_fileHandle;
 			HANDLE m_fileMapping;
-			uint8_t* m_data;
+			uchar* m_data;
 			std::size_t m_fileSize;
 		};
 	}
@@ -28,7 +28,7 @@ MemoryMappedFile::MemoryMappedFile(HANDLE a_fileHandle, std::size_t a_fileSize) 
 									m_fileSize(a_fileSize)
 {
 	m_fileMapping = CreateFileMapping(a_fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-	m_data = (uint8_t*)MapViewOfFile(m_fileMapping, FILE_MAP_READ, 0, 0, 0);
+	m_data = (uchar*)MapViewOfFile(m_fileMapping, FILE_MAP_READ, 0, 0, 0);
 }
 
 MemoryMappedFile::~MemoryMappedFile()
