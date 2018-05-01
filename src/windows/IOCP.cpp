@@ -1,5 +1,4 @@
 #include "IOCP.h"
-#include <core\Singleton.h>
 #include <thread>
 #include <unordered_map>
 
@@ -18,20 +17,26 @@ namespace CR
 		};
 
 		//Doesn't scale past one thread at the moment. would require some redesign to do so.
-		class IOCPThread : public CR::Core::Singleton<IOCPThread>
+		class IOCPThread
 		{
 		public:
-			friend CR::Core::Singleton<IOCPThread>;
 			void RegisterIOCPPort(IOCPPort* a_port, HANDLE a_handle);
-		private:
 			IOCPThread();
 			~IOCPThread();
+      IOCPThread(const IOCPThread&) = delete;
+      IOCPThread& operator=(const IOCPThread&) = delete;
 
 			void RunIOCPThread();
 
+    private:
 			std::thread m_iocpThread;
 			HANDLE m_iocpHandle;
 		};
+
+    IOCPThread& GetIOCPThread() {
+      static IOCPThread iocpThread;
+      return iocpThread;
+    }
 	}
 }
 
@@ -39,7 +44,7 @@ using namespace CR::Platform;
 
 IOCPPort::IOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion) : m_completion(std::move(a_completion))
 {
-	IOCPThread::Instance().RegisterIOCPPort(this, a_handle);
+  GetIOCPThread().RegisterIOCPPort(this, a_handle);
 }
 
 IOCPThread::IOCPThread()
