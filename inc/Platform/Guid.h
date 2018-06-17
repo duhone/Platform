@@ -2,5 +2,5 @@
 #include <core\Guid.h>
 
 namespace CR::Platform {
-  CR::Core::Guid CreateGuid();
+	CR::Core::Guid CreateGuid();
 }
