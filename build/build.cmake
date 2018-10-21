@@ -55,7 +55,6 @@ set(PLATFORM_TEST_SRCS
 	
 	add_executable(platform_tests  $<TARGET_OBJECTS:platform>
 						$<TARGET_OBJECTS:core>
-						$<TARGET_OBJECTS:math>
 						${PLATFORM_TEST_SRCS})
 						
 	source_group("Source" FILES ${PLATFORM_TEST_SRCS})

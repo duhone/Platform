@@ -1,5 +1,5 @@
 #pragma once
-#include "math/Types.h"
+#include <cstdint>
 #include <functional>
 #include <memory>
 
@@ -19,6 +19,6 @@ namespace CR::Platform {
 
 	// For now their is an assumption that an application only ever creates one of these.
 	// Some work needs to be done if that assumption isn't valid.
-	std::unique_ptr<IWindow> CRCreateWindow(const char* a_windowTitle, uint a_width, uint a_height,
+	std::unique_ptr<IWindow> CRCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height,
 	                                        IWindow::OnDestroyT a_onDestroy);
 }    // namespace CR::Platform
