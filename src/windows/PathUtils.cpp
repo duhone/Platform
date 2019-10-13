@@ -1,9 +1,9 @@
 #include "Platform/PathUtils.h"
 #include <Windows.h>
-#include <experimental\filesystem>
+#include <filesystem>
 
 using namespace CR::Platform;
-using namespace std::experimental::filesystem;
+using namespace std::filesystem;
 
 std::string CR::Platform::GetCurrentProcessPath() {
 	char filenameWithPath[_MAX_PATH];
