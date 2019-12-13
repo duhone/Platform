@@ -1,47 +1,56 @@
-include_directories("${CMAKE_CURRENT_LIST_DIR}/../inc")
-
+set(platform_root "${CMAKE_CURRENT_LIST_DIR}/..")
 
 ###############################################
 #library
 ###############################################
 set(PLATFORM_PUBLIC_HDRS
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/Event.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/Guid.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/MemoryMappedFile.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/PathUtils.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/PipeClient.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/PipeServer.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/Process.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/SharedLibrary.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/SharedMemory.h
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/Platform/Window.h
+    ${platform_root}/inc/Platform/Event.h
+    ${platform_root}/inc/Platform/Guid.h
+    ${platform_root}/inc/Platform/MemoryMappedFile.h
+    ${platform_root}/inc/Platform/PathUtils.h
+    ${platform_root}/inc/Platform/PipeClient.h
+    ${platform_root}/inc/Platform/PipeServer.h
+    ${platform_root}/inc/Platform/Process.h
+    ${platform_root}/inc/Platform/SharedLibrary.h
+    ${platform_root}/inc/Platform/SharedMemory.h
+    ${platform_root}/inc/Platform/Window.h
 )
 
 set(PLATFORM_SRCS
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/Event.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/Guid.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/IOCP.h
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/IOCP.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/MemoryMappedFile.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/PathUtils.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/PipeClient.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/PipeServer.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/Process.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/SharedLibrary.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/SharedMemory.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../src/windows/Window.cpp
+    ${platform_root}/src/windows/Event.cpp
+    ${platform_root}/src/windows/Guid.cpp
+    ${platform_root}/src/windows/IOCP.h
+    ${platform_root}/src/windows/IOCP.cpp
+    ${platform_root}/src/windows/MemoryMappedFile.cpp
+    ${platform_root}/src/windows/PathUtils.cpp
+    ${platform_root}/src/windows/PipeClient.cpp
+    ${platform_root}/src/windows/PipeServer.cpp
+    ${platform_root}/src/windows/Process.cpp
+    ${platform_root}/src/windows/SharedLibrary.cpp
+    ${platform_root}/src/windows/SharedMemory.cpp
+    ${platform_root}/src/windows/Window.cpp
 )
 
 set(PLATFORM_BUILD
-    ${CMAKE_CURRENT_LIST_DIR}/../build/build.cmake
+    ${platform_root}/build/build.cmake
 )
 
-add_library(platform OBJECT  ${PLATFORM_PUBLIC_HDRS} ${PLATFORM_SRCS} ${PLATFORM_BUILD})
+add_library(platform OBJECT  
+  ${PLATFORM_PUBLIC_HDRS} 
+  ${PLATFORM_SRCS} 
+  ${PLATFORM_BUILD}
+)
 						
 source_group("Public Headers" FILES ${PLATFORM_PUBLIC_HDRS})
 source_group("Source" FILES ${CMAKE_CURRENT_LIST_DIR})
 source_group("Build" FILES ${PLATFORM_BUILD})
 	
+target_include_directories(platform PUBLIC "${platform_root}/inc")
+target_link_libraries(platform
+  spdlog
+  fmt
+  core 
+)
 				
 if(IncludeTests)  
 	###############################################
@@ -53,11 +62,16 @@ set(PLATFORM_TEST_SRCS
     ${CMAKE_CURRENT_LIST_DIR}/../tests/SharedLibrary.cpp
 )
 	
-	add_executable(platform_tests  $<TARGET_OBJECTS:platform>
-						$<TARGET_OBJECTS:core>
-						$<TARGET_OBJECTS:fmt> 
+	add_executable(platform_tests 
 						${PLATFORM_TEST_SRCS})
-						
+							
+  target_link_libraries(platform_tests 
+    catch
+    fmt
+    platform
+    core
+  )		
+
 	source_group("Source" FILES ${PLATFORM_TEST_SRCS})
 						
 	set_property(TARGET platform_tests APPEND PROPERTY FOLDER tests)
