@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <filesystem>
 
 namespace CR::Platform {
 	struct IMemoryMappedFile {
@@ -19,5 +20,5 @@ namespace CR::Platform {
 		virtual uint8_t* data()    = 0;
 	};
 
-	std::unique_ptr<IMemoryMappedFile> OpenMMapFile(const char* a_fileName);
+	std::unique_ptr<IMemoryMappedFile> OpenMMapFile(const std::filesystem::path& a_filePath);
 }    // namespace CR::Platform

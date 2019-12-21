@@ -32,8 +32,8 @@ MemoryMappedFile::~MemoryMappedFile() {
 	CloseHandle(m_fileHandle);
 }
 
-std::unique_ptr<IMemoryMappedFile> CR::Platform::OpenMMapFile(const char* a_fileName) {
-	auto handle = CreateFile(a_fileName, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+std::unique_ptr<IMemoryMappedFile> CR::Platform::OpenMMapFile(const std::filesystem::path& a_filePath) {
+	auto handle = CreateFileW(a_filePath.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if(handle == INVALID_HANDLE_VALUE) return nullptr;
 	LARGE_INTEGER fileSize;
 	if(!GetFileSizeEx(handle, &fileSize)) return nullptr;
