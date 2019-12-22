@@ -1,6 +1,10 @@
 #include "Platform/Process.h"
 #include <Windows.h>
 
+#include <string>
+
+using namespace std;
+
 namespace CR::Platform {
 	class Process : public IProcess {
 	  public:
@@ -34,7 +38,10 @@ std::unique_ptr<IProcess> CR::Platform::CRCreateProcess(const char* executablePa
 	PROCESS_INFORMATION processInfo;
 	memset(&processInfo, 0, sizeof(processInfo));
 
-	auto created = CreateProcess(executablePath, (LPSTR)a_commandLine, nullptr, nullptr, false, 0, nullptr, nullptr,
+	string commandLine = executablePath;
+	commandLine += " ";
+	commandLine += a_commandLine;
+	auto created = CreateProcess(nullptr, (LPSTR)commandLine.c_str(), nullptr, nullptr, false, 0, nullptr, nullptr,
 	                             &startupInfo, &processInfo);
 	if(!created) return nullptr;
 	CloseHandle(processInfo.hThread);
