@@ -11,6 +11,7 @@ namespace CR::Platform {
 		Process(HANDLE a_processHandle, uint32_t a_processID);
 		virtual ~Process();
 		bool WaitForClose(const std::chrono::milliseconds& a_maxWait) override;
+		std::optional<int32_t> GetExitCode() override;
 
 	  private:
 		HANDLE m_processHandle;
@@ -29,6 +30,13 @@ Process::~Process() {
 
 bool Process::WaitForClose(const std::chrono::milliseconds& a_maxWait) {
 	return WaitForSingleObject(m_processHandle, static_cast<DWORD>(a_maxWait.count())) == WAIT_OBJECT_0;
+}
+
+std::optional<int32_t> Process::GetExitCode() {
+	int32_t exitCode = 0;
+	if(GetExitCodeProcess(m_processHandle, (DWORD*)&exitCode) == FALSE) { return optional<int32_t>{}; }
+	if(exitCode == STILL_ACTIVE) { return optional<int32_t>{}; }
+	return optional<int32_t>{exitCode};
 }
 
 std::unique_ptr<IProcess> CR::Platform::CRCreateProcess(const char* executablePath, const char* a_commandLine) {
