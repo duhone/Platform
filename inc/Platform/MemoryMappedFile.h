@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstddef>
 #include <memory>
 #include <filesystem>
 
@@ -17,7 +18,7 @@ namespace CR::Platform {
 
 		// follow stl naming convention for compatibility with non member data/size
 		virtual std::size_t size() = 0;
-		virtual uint8_t* data()    = 0;
+		virtual std::byte* data()    = 0;
 	};
 
 	std::unique_ptr<IMemoryMappedFile> OpenMMapFile(const std::filesystem::path& a_filePath);
