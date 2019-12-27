@@ -10,6 +10,6 @@ TEST_CASE("memory mapped files", "") {
 	REQUIRE(mmapFile);
 	REQUIRE(mmapFile->size() == 2);
 	auto data = mmapFile->data();
-	REQUIRE(data[0] == '5');
-	REQUIRE(data[1] == '8');
+	REQUIRE((char)data[0] == '5');
+	REQUIRE((char)data[1] == '8');
 }
