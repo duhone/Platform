@@ -6,7 +6,7 @@
 TEST_CASE("memory mapped files", "") {
 	auto testFilePath = CR::Platform::GetCurrentProcessPath();
 	testFilePath.append("test.txt");
-	auto mmapFile     = CR::Platform::OpenMMapFile(testFilePath.c_str());
+	auto mmapFile = CR::Platform::OpenMMapFile(testFilePath.c_str());
 	REQUIRE(mmapFile);
 	REQUIRE(mmapFile->size() == 2);
 	auto data = mmapFile->data();

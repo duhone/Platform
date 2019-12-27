@@ -1,5 +1,5 @@
-#include "IOCP.h"
 #include "Platform/PipeServer.h"
+#include "IOCP.h"
 #include "Platform/Window.h"
 #include <algorithm>
 #include <cassert>
