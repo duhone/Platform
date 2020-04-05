@@ -1,7 +1,7 @@
-#include "catch.hpp"
-
-#include "Platform/SharedLibrary.h"
+﻿#include "Platform/SharedLibrary.h"
 #include <functional>
+
+#include <3rdParty/doctest.h>
 
 // test.dll is a dll that exports 2 functions, GetTestValue and SetTestValue. These functions get and set
 // a global variable in the dll. Code for this dll not included but it is trivial to implement.
@@ -10,7 +10,7 @@ using namespace CR::Platform;
 
 // By having 2 test cases we are also testing unloading the dll, then reloading it and its global variable going back to
 // 0
-TEST_CASE("shared library void* style", "") {
+TEST_CASE("shared library void* style") {
 	auto library = LoadSharedLibrary("testdll");
 	REQUIRE(library);
 	auto GetTestValue = (int (*)())library->GetFunction("GetTestValue");
@@ -22,7 +22,7 @@ TEST_CASE("shared library void* style", "") {
 	REQUIRE(GetTestValue() == 5);
 }
 
-TEST_CASE("shared library std::function style", "") {
+TEST_CASE("shared library std::function style") {
 	auto library = LoadSharedLibrary("testdll");
 	REQUIRE(library);
 	auto GetTestValue = library->GetStdFunction<int()>("GetTestValue");

@@ -1,9 +1,9 @@
-#include "catch.hpp"
-
-#include "Platform/MemoryMappedFile.h"
+﻿#include "Platform/MemoryMappedFile.h"
 #include "Platform/PathUtils.h"
 
-TEST_CASE("memory mapped files", "") {
+#include <3rdParty/doctest.h>
+
+TEST_CASE("memory mapped files") {
 	auto testFilePath = CR::Platform::GetCurrentProcessPath();
 	testFilePath.append("test.txt");
 	auto mmapFile = CR::Platform::OpenMMapFile(testFilePath.c_str());
