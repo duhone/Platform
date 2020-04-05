@@ -1,25 +1,25 @@
-#pragma once
+﻿#pragma once
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
 
 namespace CR::Platform {
-	struct IMemoryMappedFile {
-	  protected:
-		IMemoryMappedFile() = default;
-
+	class MemoryMappedFile final {
 	  public:
-		virtual ~IMemoryMappedFile()                = default;
-		IMemoryMappedFile(const IMemoryMappedFile&) = delete;
-		IMemoryMappedFile(IMemoryMappedFile&&)      = delete;
-		IMemoryMappedFile& operator=(const IMemoryMappedFile&) = delete;
-		IMemoryMappedFile& operator=(IMemoryMappedFile&&) = delete;
+		MemoryMappedFile();
+		MemoryMappedFile(const std::filesystem::path& a_filePath);
+		~MemoryMappedFile();
+		MemoryMappedFile(const MemoryMappedFile&) = delete;
+		MemoryMappedFile(MemoryMappedFile&& a_other) noexcept;
+		MemoryMappedFile& operator=(const MemoryMappedFile&) = delete;
+		MemoryMappedFile& operator                           =(MemoryMappedFile&& a_other) noexcept;
 
 		// follow stl naming convention for compatibility with non member data/size
-		virtual std::size_t size() = 0;
-		virtual std::byte* data()  = 0;
-	};
+		std::size_t size() noexcept;
+		std::byte* data() noexcept;
 
-	std::unique_ptr<IMemoryMappedFile> OpenMMapFile(const std::filesystem::path& a_filePath);
+	  private:
+		std::unique_ptr<struct MemoryMappedFileData> m_fileData;
+	};
 }    // namespace CR::Platform

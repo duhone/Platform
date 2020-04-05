@@ -1,42 +1,66 @@
-#include "Platform/MemoryMappedFile.h"
+﻿#include "Platform/MemoryMappedFile.h"
+
+#include "core/Log.h"
+
 #include <windows.h>
 
+using namespace CR;
 using namespace CR::Platform;
 
 namespace CR::Platform {
-	class MemoryMappedFile : public IMemoryMappedFile {
-	  public:
-		MemoryMappedFile(HANDLE a_fileHandle, std::size_t a_fileSize);
-		virtual ~MemoryMappedFile();
-
-		std::byte* data() override { return m_data; }
-		std::size_t size() override { return m_fileSize; }
-
-	  private:
-		HANDLE m_fileHandle;
-		HANDLE m_fileMapping;
-		std::byte* m_data;
-		std::size_t m_fileSize;
+	struct MemoryMappedFileData {
+		HANDLE m_fileHandle{INVALID_HANDLE_VALUE};
+		HANDLE m_fileMapping{INVALID_HANDLE_VALUE};
+		std::byte* m_data{nullptr};
+		std::size_t m_fileSize{0};
 	};
 }    // namespace CR::Platform
 
-MemoryMappedFile::MemoryMappedFile(HANDLE a_fileHandle, std::size_t a_fileSize) :
-    m_fileHandle(a_fileHandle), m_fileSize(a_fileSize) {
-	m_fileMapping = CreateFileMapping(a_fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-	m_data        = (std::byte*)MapViewOfFile(m_fileMapping, FILE_MAP_READ, 0, 0, 0);
+MemoryMappedFile::MemoryMappedFile() {}
+
+MemoryMappedFile::MemoryMappedFile(const std::filesystem::path& a_filePath) {
+	auto handle = CreateFileW(a_filePath.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	Core::Log::Error(handle != INVALID_HANDLE_VALUE, "Could not open file {}", a_filePath.string());
+
+	LARGE_INTEGER fileSize;
+	if(!GetFileSizeEx(handle, &fileSize)) {
+		Core::Log::Error(false, "Could not get file size for {}", a_filePath.string());
+	}
+	Core::Log::Error(fileSize.QuadPart != 0, "File {} was 0 sized", a_filePath.string());
+
+	m_fileData               = std::make_unique<MemoryMappedFileData>();
+	m_fileData->m_fileHandle = handle;
+	m_fileData->m_fileSize   = fileSize.QuadPart;
+
+	m_fileData->m_fileMapping = CreateFileMapping(m_fileData->m_fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
+	Core::Log::Error(m_fileData->m_fileMapping != INVALID_HANDLE_VALUE, "Could not map file {}", a_filePath.string());
+	m_fileData->m_data = (std::byte*)MapViewOfFile(m_fileData->m_fileMapping, FILE_MAP_READ, 0, 0, 0);
 }
 
 MemoryMappedFile::~MemoryMappedFile() {
-	UnmapViewOfFile(m_data);
-	CloseHandle(m_fileMapping);
-	CloseHandle(m_fileHandle);
+	if(m_fileData) {
+		UnmapViewOfFile(m_fileData->m_data);
+		CloseHandle(m_fileData->m_fileMapping);
+		CloseHandle(m_fileData->m_fileHandle);
+	}
 }
 
-std::unique_ptr<IMemoryMappedFile> CR::Platform::OpenMMapFile(const std::filesystem::path& a_filePath) {
-	auto handle = CreateFileW(a_filePath.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	if(handle == INVALID_HANDLE_VALUE) return nullptr;
-	LARGE_INTEGER fileSize;
-	if(!GetFileSizeEx(handle, &fileSize)) return nullptr;
-	if(fileSize.QuadPart == 0) return nullptr;
-	return std::make_unique<MemoryMappedFile>(handle, static_cast<size_t>(fileSize.QuadPart));
+MemoryMappedFile::MemoryMappedFile(MemoryMappedFile&& a_other) noexcept {
+	*this = std::move(a_other);
+}
+
+MemoryMappedFile& MemoryMappedFile::operator=(MemoryMappedFile&& a_other) noexcept {
+	if(this == &a_other) { return *this; }
+	m_fileData = std::move(a_other.m_fileData);
+	return *this;
+}
+
+std::size_t MemoryMappedFile::size() noexcept {
+	if(!m_fileData) { return 0; }
+	return m_fileData->m_fileSize;
+}
+
+std::byte* MemoryMappedFile::data() noexcept {
+	if(!m_fileData) { return nullptr; }
+	return m_fileData->m_data;
 }
