@@ -20,20 +20,20 @@ MemoryMappedFile::MemoryMappedFile() {}
 
 MemoryMappedFile::MemoryMappedFile(const std::filesystem::path& a_filePath) {
 	auto handle = CreateFileW(a_filePath.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	Core::Log::Error(handle != INVALID_HANDLE_VALUE, "Could not open file {}", a_filePath.string());
+	Core::Log::Require(handle != INVALID_HANDLE_VALUE, "Could not open file {}", a_filePath.string());
 
 	LARGE_INTEGER fileSize;
 	if(!GetFileSizeEx(handle, &fileSize)) {
-		Core::Log::Error(false, "Could not get file size for {}", a_filePath.string());
+		Core::Log::Assert(false, "Could not get file size for {}", a_filePath.string());
 	}
-	Core::Log::Error(fileSize.QuadPart != 0, "File {} was 0 sized", a_filePath.string());
+	Core::Log::Require(fileSize.QuadPart != 0, "File {} was 0 sized", a_filePath.string());
 
 	m_fileData               = std::make_unique<MemoryMappedFileData>();
 	m_fileData->m_fileHandle = handle;
 	m_fileData->m_fileSize   = fileSize.QuadPart;
 
 	m_fileData->m_fileMapping = CreateFileMapping(m_fileData->m_fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-	Core::Log::Error(m_fileData->m_fileMapping != INVALID_HANDLE_VALUE, "Could not map file {}", a_filePath.string());
+	Core::Log::Assert(m_fileData->m_fileMapping != INVALID_HANDLE_VALUE, "Could not map file {}", a_filePath.string());
 	m_fileData->m_data = (std::byte*)MapViewOfFile(m_fileData->m_fileMapping, FILE_MAP_READ, 0, 0, 0);
 }
 

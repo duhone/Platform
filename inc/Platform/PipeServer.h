@@ -1,26 +1,31 @@
-#pragma once
+﻿#pragma once
 #include <functional>
 #include <memory>
 
+#include <3rdParty/function2.h>
+
 namespace CR::Platform {
-	struct IPipeServer {
-	  protected:
-		IPipeServer() = default;
-
+	class PipeServer final {
 	  public:
-		virtual ~IPipeServer()          = default;
-		IPipeServer(const IPipeServer&) = delete;
-		IPipeServer& operator=(const IPipeServer&) = delete;
+		using WriteFinished_t = fu2::unique_function<void(void*, size_t)>;
+		using ReadFinished_t  = fu2::unique_function<void(void*, size_t)>;
 
-		using WriteFinishedT                                 = std::function<void(void*, size_t)>;
-		virtual void WriteMsg(void* a_msg, size_t a_msgSize) = 0;
+		PipeServer(const char* a_name, PipeServer::WriteFinished_t a_writeFinished,
+		           PipeServer::ReadFinished_t a_readFinished);
+		~PipeServer() noexcept;
+		PipeServer(const PipeServer&) = delete;
+		PipeServer& operator=(const PipeServer&) = delete;
+		PipeServer(PipeServer&& a_other) noexcept;
+		PipeServer& operator=(PipeServer&& a_other) noexcept;
+
+		void WriteMsg(void* a_msg, size_t a_msgSize);
 		template<typename T>
 		void WriteMsg(T* a_msg) {
 			WriteMsg(a_msg, sizeof(T));
 		}
-		using ReadFinishedT = std::function<void(void*, size_t)>;
+
+	  private:
+		std::unique_ptr<struct PipeServerData> m_data;
 	};
 
-	std::unique_ptr<IPipeServer> CreatePipeServer(const char* a_name, IPipeServer::WriteFinishedT a_writeFinished,
-	                                              IPipeServer::ReadFinishedT a_readFinished);
 }    // namespace CR::Platform

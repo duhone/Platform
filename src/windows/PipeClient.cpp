@@ -25,12 +25,12 @@ using namespace CR::Platform;
 using namespace CR::Core::Literals;
 
 PipeClient::PipeClient(const char* a_name, PipeClient::MsgHandlerT a_msgHandler) : m_data(new PipeClientData{}) {
-	Core::Log::Error((bool)a_msgHandler, "a_msgHandler is required");
+	Core::Log::Assert((bool)a_msgHandler, "a_msgHandler is required");
 	m_data->m_msgHandler = std::move(a_msgHandler);
 
 	m_data->m_pipeHandle =
 	    CreateFile(a_name, GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, nullptr);
-	Core::Log::Error(m_data->m_pipeHandle != INVALID_HANDLE_VALUE, "Couldn't open pipe handle with name {}", a_name);
+	Core::Log::Assert(m_data->m_pipeHandle != INVALID_HANDLE_VALUE, "Couldn't open pipe handle with name {}", a_name);
 	DWORD pipeState = PIPE_READMODE_MESSAGE;
 	SetNamedPipeHandleState(m_data->m_pipeHandle, &pipeState, nullptr, nullptr);
 
@@ -59,7 +59,7 @@ PipeClient& PipeClient::operator=(PipeClient&& a_other) noexcept {
 
 void PipeClient::SendPipeMessage(const void* a_msg, size_t a_msgSize) {
 	DWORD bytesWritten = 0;
-	Core::Log::Error(
+	Core::Log::Assert(
 	    a_msgSize < 4_Kb,
 	    "a_msgSize too large");    // arbitrary, but if larger than this might want to switch to an async implementation
 	ResetEvent(m_data->m_writeEvent);

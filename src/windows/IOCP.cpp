@@ -1,18 +1,12 @@
-#include "IOCP.h"
+﻿#include "IOCP.h"
+
 #include <thread>
 #include <unordered_map>
 
-namespace CR::Platform {
-	class IOCPPort : public IIOCPort {
-	  public:
-		IOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion);
-		virtual ~IOCPPort() = default;
-		void RunContinuation(OVERLAPPED* a_result, std::size_t a_msgSize) { m_completion(a_result, a_msgSize); }
+using namespace CR;
+using namespace CR::Platform;
 
-	  private:
-		IIOCPort::CompletionCallbackT m_completion;
-	};
-
+namespace {
 	// Doesn't scale past one thread at the moment. would require some redesign to do so.
 	class IOCPThread {
 	  public:
@@ -33,12 +27,11 @@ namespace CR::Platform {
 		static IOCPThread iocpThread;
 		return iocpThread;
 	}
-}    // namespace CR::Platform
+}    // namespace
 
 using namespace CR::Platform;
 
-IOCPPort::IOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion) :
-    m_completion(std::move(a_completion)) {
+IOCPPort::IOCPPort(HANDLE a_handle, CompletionCallback_t a_completion) : m_completion(std::move(a_completion)) {
 	GetIOCPThread().RegisterIOCPPort(this, a_handle);
 }
 
@@ -63,8 +56,4 @@ void IOCPThread::RunIOCPThread() {
 
 void IOCPThread::RegisterIOCPPort(IOCPPort* a_port, HANDLE a_handle) {
 	CreateIoCompletionPort(a_handle, m_iocpHandle, (ULONG_PTR)a_port, 1);
-}
-
-std::unique_ptr<IIOCPort> CR::Platform::OpenIOCPPort(HANDLE a_handle, IIOCPort::CompletionCallbackT a_completion) {
-	return std::make_unique<IOCPPort>(a_handle, std::move(a_completion));
 }

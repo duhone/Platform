@@ -34,14 +34,14 @@ Event& Event::operator=(Event&& a_other) noexcept {
 }
 
 void Event::Reset() {
-	Core::Log::Error((bool)m_data, "Tried to use an moved from Event");
+	Core::Log::Assert((bool)m_data, "Tried to use an moved from Event");
 	ResetEvent(m_data->EventHandle);
 }
 void Event::Wait() {
-	Core::Log::Error((bool)m_data, "Tried to use an moved from Event");
+	Core::Log::Assert((bool)m_data, "Tried to use an moved from Event");
 	WaitForSingleObject(m_data->EventHandle, INFINITE);
 }
 void Event::Notify() {
-	Core::Log::Error((bool)m_data, "Tried to use an moved from Event");
+	Core::Log::Assert((bool)m_data, "Tried to use an moved from Event");
 	SetEvent(m_data->EventHandle);
 }

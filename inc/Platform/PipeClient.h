@@ -6,7 +6,7 @@
 #include <type_traits>
 
 namespace CR::Platform {
-	class PipeClient {
+	class PipeClient final {
 	  public:
 		using MsgHandlerT = fu2::unique_function<void(void*, size_t)>;
 
