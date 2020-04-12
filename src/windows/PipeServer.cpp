@@ -63,6 +63,7 @@ PipeServer::PipeServer(const char* a_name, PipeServer::WriteFinished_t a_writeFi
 }
 
 PipeServer::~PipeServer() noexcept {
+	if(!m_data) { return; }
 	m_data->m_finished.store(true, std::memory_order_release);
 	CloseHandle(m_data->m_pipeHandle);
 	// assert(m_totalCreatedOps == m_operationPool.unsafe_size());

@@ -1,27 +1,31 @@
-#pragma once
-#include <core\Concepts.h>
+﻿#pragma once
 #include <core\TypeTraits.h>
+
+#include <3rdParty/function2.h>
+
 #include <functional>
 #include <memory>
 
 namespace CR::Platform {
-	struct ISharedLibrary {
-	  protected:
-		ISharedLibrary() = default;
-
+	struct SharedLibrary {
 	  public:
-		virtual ~ISharedLibrary()             = default;
-		ISharedLibrary(const ISharedLibrary&) = delete;
-		ISharedLibrary& operator=(const ISharedLibrary&) = delete;
+		SharedLibrary() = default;
+		SharedLibrary(const char* a_libraryName);
+		~SharedLibrary() noexcept;
+		SharedLibrary(const SharedLibrary&) = delete;
+		SharedLibrary& operator=(const SharedLibrary&) = delete;
+		SharedLibrary(SharedLibrary&& a_other) noexcept;
+		SharedLibrary& operator=(SharedLibrary&& a_other) noexcept;
 
-		virtual void* GetFunction(const char* a_functionName) = 0;
+		void* GetFunction(const char* a_functionName) const;
 
-		template<Callable CallableT>
-		auto GetStdFunction(const char* a_functionName) {
-			return std::function<CallableT>{
+		template<typename CallableT>
+		auto GetUniqueFunction(const char* a_functionName) const {
+			return fu2::unique_function<CallableT>{
 			    static_cast<Core::GetFunctionPtrType_t<CallableT>>(GetFunction(a_functionName))};
 		}
-	};
 
-	std::unique_ptr<ISharedLibrary> LoadSharedLibrary(const char* a_libraryName);
+	  private:
+		std::unique_ptr<struct SharedLibraryData> m_data;
+	};
 }    // namespace CR::Platform

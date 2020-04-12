@@ -11,11 +11,10 @@ using namespace CR::Platform;
 // By having 2 test cases we are also testing unloading the dll, then reloading it and its global variable going back to
 // 0
 TEST_CASE("shared library void* style") {
-	auto library = LoadSharedLibrary("testdll");
-	REQUIRE(library);
-	auto GetTestValue = (int (*)())library->GetFunction("GetTestValue");
+	SharedLibrary library("testdll");
+	auto GetTestValue = (int (*)())library.GetFunction("GetTestValue");
 	REQUIRE(GetTestValue);
-	auto SetTestValue = (void (*)(int))library->GetFunction("SetTestValue");
+	auto SetTestValue = (void (*)(int))library.GetFunction("SetTestValue");
 	REQUIRE(SetTestValue);
 	REQUIRE(GetTestValue() == 0);
 	SetTestValue(5);
@@ -23,11 +22,10 @@ TEST_CASE("shared library void* style") {
 }
 
 TEST_CASE("shared library std::function style") {
-	auto library = LoadSharedLibrary("testdll");
-	REQUIRE(library);
-	auto GetTestValue = library->GetStdFunction<int()>("GetTestValue");
+	SharedLibrary library("testdll");
+	auto GetTestValue = library.GetUniqueFunction<int()>("GetTestValue");
 	REQUIRE(GetTestValue);
-	auto SetTestValue = library->GetStdFunction<void(int)>("SetTestValue");
+	auto SetTestValue = library.GetUniqueFunction<void(int)>("SetTestValue");
 	REQUIRE(SetTestValue);
 	REQUIRE(GetTestValue() == 0);
 	SetTestValue(5);

@@ -1,29 +1,18 @@
-#include "Platform/SharedLibrary.h"
+﻿#include "Platform/SharedLibrary.h"
+
+#include "core/Log.h"
+
 #include <windows.h>
 
 namespace CR::Platform {
-	class SharedLibrary : public ISharedLibrary {
-	  public:
-		SharedLibrary(HMODULE a_libraryModule);
-		virtual ~SharedLibrary();
-		void* GetFunction(const char* a_functionName) override;
-
-	  private:
+	struct SharedLibraryData {
 		HMODULE m_libraryModule;
 	};
 }    // namespace CR::Platform
 
+using namespace CR;
 using namespace CR::Platform;
 
-SharedLibrary::SharedLibrary(HMODULE a_libraryModule) : m_libraryModule(a_libraryModule) {}
-
-SharedLibrary::~SharedLibrary() {
-	FreeLibrary(m_libraryModule);
-}
-
-void* SharedLibrary::GetFunction(const char* a_functionName) {
-	return GetProcAddress(m_libraryModule, a_functionName);
-}
 /*
 #include <strsafe.h>
 void ErrorExit(LPTSTR lpszFunction)
@@ -59,12 +48,29 @@ void ErrorExit(LPTSTR lpszFunction)
   //ExitProcess(dw);
 }
 */
-std::unique_ptr<ISharedLibrary> CR::Platform::LoadSharedLibrary(const char* a_libraryName) {
-	auto library = LoadLibrary(a_libraryName);
-	if(!library) {
-		// ErrorExit("Failed to load library");
-		return nullptr;
-	}
 
-	return std::make_unique<SharedLibrary>(library);
+SharedLibrary::SharedLibrary(const char* a_libraryName) : m_data(new SharedLibraryData) {
+	m_data->m_libraryModule = LoadLibrary(a_libraryName);
+	if(!m_data->m_libraryModule) {
+		// ErrorExit("Failed to load library");
+		Core::Log::Error("Failed to load library");
+	}
+}
+
+SharedLibrary::~SharedLibrary() {
+	if(!m_data) { return; }
+	FreeLibrary(m_data->m_libraryModule);
+}
+
+void* SharedLibrary::GetFunction(const char* a_functionName) const {
+	return GetProcAddress(m_data->m_libraryModule, a_functionName);
+}
+
+SharedLibrary::SharedLibrary(SharedLibrary&& a_other) noexcept {
+	*this = std::move(a_other);
+}
+
+SharedLibrary& SharedLibrary::operator=(SharedLibrary&& a_other) noexcept {
+	m_data = std::move(a_other.m_data);
+	return *this;
 }

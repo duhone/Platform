@@ -42,6 +42,7 @@ PipeClient::PipeClient(const char* a_name, PipeClient::MsgHandlerT a_msgHandler)
 }
 
 PipeClient::~PipeClient() {
+	if(!m_data) { return; }
 	m_data->m_closed.store(true, std::memory_order_release);
 	CloseHandle(m_data->m_pipeHandle);
 	if(m_data->m_msgThread.joinable()) m_data->m_msgThread.join();

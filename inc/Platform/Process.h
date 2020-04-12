@@ -1,23 +1,25 @@
-#pragma once
+﻿#pragma once
 #include <chrono>
 #include <memory>
 #include <optional>
 
 namespace CR::Platform {
-	struct IProcess {
-	  protected:
-		IProcess() = default;
-
+	class Process final {
 	  public:
-		virtual ~IProcess()       = default;
-		IProcess(const IProcess&) = delete;
-		IProcess& operator=(const IProcess&) = delete;
+		Process() = default;
+		Process(const char* a_executablePath, const char* a_commandLine);
+		~Process();
+		Process(const Process&) = delete;
+		Process& operator=(const Process&) = delete;
+		Process(Process&& a_other) noexcept;
+		Process& operator=(Process&& a_other) noexcept;
 
 		// Returns false if timed out waiting for process to close, or if some other error occured
-		virtual bool WaitForClose(const std::chrono::milliseconds& a_maxWait) = 0;
+		bool WaitForClose(const std::chrono::milliseconds& a_maxWait);
 
-		virtual std::optional<int32_t> GetExitCode() = 0;
+		[[nodiscard]] std::optional<int32_t> GetExitCode() const;
+
+	  private:
+		std::unique_ptr<struct ProcessData> m_data;
 	};
-
-	std::unique_ptr<IProcess> CRCreateProcess(const char* a_executablePath, const char* a_commandLine);
 }    // namespace CR::Platform
