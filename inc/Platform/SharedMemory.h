@@ -1,22 +1,31 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #include <memory>
 
 namespace CR::Platform {
-	struct ISharedMemory {
-	  protected:
-		ISharedMemory() = default;
-
+	class SharedMemory final {
 	  public:
-		virtual ~ISharedMemory()            = default;
-		ISharedMemory(const ISharedMemory&) = delete;
-		ISharedMemory& operator=(const ISharedMemory&) = delete;
+		struct CreateNew {};
+		struct OpenExisting {};
+
+		SharedMemory() = default;
+		// This will create a new shared memory object
+		SharedMemory(const char* a_name, size_t a_size, CreateNew);
+		// This will open an existing shared memory space, it must already exist
+		SharedMemory(const char* a_name, size_t a_size, OpenExisting);
+		~SharedMemory();
+
+		SharedMemory(const SharedMemory&) = delete;
+		SharedMemory& operator=(const SharedMemory&) = delete;
+		SharedMemory(SharedMemory&& a_other) noexcept;
+		SharedMemory& operator=(SharedMemory&& a_other) noexcept;
 
 		// follow stl naming convention for compatibility with non member data/size
-		virtual std::size_t size() = 0;
-		virtual uint8_t* data()    = 0;
-	};
+		[[nodiscard]] std::size_t size() const;
+		[[nodiscard]] const uint8_t* data() const;
+		[[nodiscard]] uint8_t* data();
 
-	std::unique_ptr<ISharedMemory> CreateSharedMemory(const char* a_name, size_t a_size);
-	std::unique_ptr<ISharedMemory> OpenSharedMemory(const char* a_name, size_t a_size);
+	  private:
+		std::unique_ptr<struct SharedMemoryData> m_data;
+	};
 }    // namespace CR::Platform

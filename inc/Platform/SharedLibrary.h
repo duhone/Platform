@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace CR::Platform {
-	struct SharedLibrary {
+	class SharedLibrary final {
 	  public:
 		SharedLibrary() = default;
 		SharedLibrary(const char* a_libraryName);

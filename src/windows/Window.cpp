@@ -1,4 +1,4 @@
-#include "Platform/Window.h"
+﻿#include "Platform/Window.h"
 #include <Windows.h>
 #include <core/Locked.h>
 #include <string>
@@ -6,20 +6,13 @@
 #include <unordered_map>
 
 namespace CR::Platform {
-	class Window : public IWindow {
-	  public:
-		Window(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, OnDestroyT a_onDestroy);
-		virtual ~Window();
-		void Destroy() override;
-		void OnDestroy();
-
-	  private:
-		void MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height);
+	struct WindowData {
+		void MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, Window* self);
 		void RunMsgLoop();
 
 		HWND m_HWND{0};
 		std::thread m_thread;
-		OnDestroyT m_onDestroy;
+		Window::OnDestroy_t m_onDestroy;
 	};
 }    // namespace CR::Platform
 
@@ -44,21 +37,39 @@ namespace {
 	}
 }    // namespace
 
-Window::Window(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, OnDestroyT a_onDestroy) :
-    m_onDestroy(std::move(a_onDestroy)) {
-	m_thread = std::thread([this, windowTitle = std::string{a_windowTitle}, a_width, a_height]() {
-		this->MyCreateWindow(windowTitle.c_str(), a_width, a_height);
-		this->RunMsgLoop();
-	});
+Window::Window(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, OnDestroy_t a_onDestroy) {
+	m_data->m_onDestroy = std::move(a_onDestroy);
+	m_data->m_thread    = std::thread([this, windowTitle = std::string{a_windowTitle}, a_width, a_height]() {
+        this->m_data->MyCreateWindow(windowTitle.c_str(), a_width, a_height, this);
+        this->m_data->RunMsgLoop();
+    });
 }
 
 Window::~Window() {
-	g_windowLookup([this](auto& winLookup) { winLookup.erase(m_HWND); });
+	if(!m_data) { return; }
+	g_windowLookup([this](auto& winLookup) { winLookup.erase(m_data->m_HWND); });
 	Destroy();
-	if(m_thread.joinable()) m_thread.join();
+	if(m_data->m_thread.joinable()) m_data->m_thread.join();
 }
 
-void Window::MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height) {
+Window::Window(Window&& a_other) noexcept {
+	*this = std::move(a_other);
+}
+
+Window& Window::operator=(Window&& a_other) noexcept {
+	m_data = std::move(a_other.m_data);
+	return *this;
+}
+
+void Window::Destroy() {
+	PostMessage(m_data->m_HWND, WM_DESTROY, 0, 0);
+}
+
+void Window::OnDestroy() {
+	m_data->m_onDestroy();
+}
+
+void WindowData::MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, Window* self) {
 	// Initialize the window class.
 	WNDCLASSEX windowClass    = {0};
 	windowClass.cbSize        = sizeof(WNDCLASSEX);
@@ -79,10 +90,10 @@ void Window::MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_
 
 	ShowWindow(m_HWND, TRUE);
 
-	g_windowLookup([this](auto& winLookup) { winLookup[m_HWND] = this; });
+	g_windowLookup([this, self](auto& winLookup) { winLookup[m_HWND] = self; });
 }
 
-void Window::RunMsgLoop() {
+void WindowData::RunMsgLoop() {
 	MSG msg           = {0};
 	BOOL GetMsgResult = TRUE;
 	while((GetMsgResult = GetMessage(&msg, NULL, 0, 0)) != 0) {
@@ -91,17 +102,4 @@ void Window::RunMsgLoop() {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-}
-
-void Window::Destroy() {
-	PostMessage(m_HWND, WM_DESTROY, 0, 0);
-}
-
-void Window::OnDestroy() {
-	m_onDestroy();
-}
-
-std::unique_ptr<IWindow> CR::Platform::CRCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height,
-                                                      IWindow::OnDestroyT a_onDestroy) {
-	return std::make_unique<Window>(a_windowTitle, a_width, a_height, a_onDestroy);
 }
