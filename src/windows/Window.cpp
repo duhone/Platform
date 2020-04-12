@@ -10,7 +10,7 @@ namespace CR::Platform {
 		void MyCreateWindow(const char* a_windowTitle, uint32_t a_width, uint32_t a_height, Window* self);
 		void RunMsgLoop();
 
-		HWND m_HWND{0};
+		HWND m_HWND{nullptr};
 		std::thread m_thread;
 		Window::OnDestroy_t m_onDestroy;
 	};
@@ -26,7 +26,7 @@ namespace {
 			case WM_DESTROY:
 				g_windowLookup([a_hWnd](auto& winLookup) {
 					auto window = winLookup.find(a_hWnd);
-					if(window != end(winLookup)) window->second->OnDestroy();
+					if(window != end(winLookup)) { window->second->OnDestroy(); }
 				});
 				PostQuitMessage(0);
 				return 0;
@@ -49,7 +49,7 @@ Window::~Window() {
 	if(!m_data) { return; }
 	g_windowLookup([this](auto& winLookup) { winLookup.erase(m_data->m_HWND); });
 	Destroy();
-	if(m_data->m_thread.joinable()) m_data->m_thread.join();
+	if(m_data->m_thread.joinable()) { m_data->m_thread.join(); }
 }
 
 Window::Window(Window&& a_other) noexcept {
@@ -97,7 +97,7 @@ void WindowData::RunMsgLoop() {
 	MSG msg           = {0};
 	BOOL GetMsgResult = TRUE;
 	while((GetMsgResult = GetMessage(&msg, NULL, 0, 0)) != 0) {
-		if(GetMsgResult < 0) PostQuitMessage(GetMsgResult);
+		if(GetMsgResult < 0) { PostQuitMessage(GetMsgResult); }
 
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);

@@ -103,7 +103,7 @@ PipeServerData::Operation* PipeServerData::GetOperation() {
 }
 
 void PipeServerData::ReturnOperation(Operation* a_operation) {
-	if(a_operation->opType != OperationType::Read) m_operationPool.push(a_operation);
+	if(a_operation->opType != OperationType::Read) { m_operationPool.push(a_operation); }
 }
 
 void PipeServerData::OnOverlapped(OVERLAPPED* a_overlapped, size_t a_size) {
@@ -114,7 +114,6 @@ void PipeServerData::OnOverlapped(OVERLAPPED* a_overlapped, size_t a_size) {
 }
 
 void PipeServerData::OnConnection(Operation* a_operation, size_t) {
-	a_operation;
 	Core::Log::Assert(a_operation->opType == OperationType::Connection, "unexpected operation type");
 	ReadMsg();
 }
@@ -131,7 +130,7 @@ void PipeServerData::OnWrite(Operation* a_operation, size_t) {
 }
 
 void PipeServerData::ReadMsg() {
-	if(m_finished) return;
+	if(m_finished) { return; }
 	auto op        = GetOperation();
 	op->opType     = OperationType::Read;
 	op->opData     = m_readBuffer;

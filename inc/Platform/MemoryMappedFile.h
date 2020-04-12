@@ -7,7 +7,7 @@
 namespace CR::Platform {
 	class MemoryMappedFile final {
 	  public:
-		MemoryMappedFile();
+		MemoryMappedFile() = default;
 		MemoryMappedFile(const std::filesystem::path& a_filePath);
 		~MemoryMappedFile();
 		MemoryMappedFile(const MemoryMappedFile&) = delete;

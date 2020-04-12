@@ -11,7 +11,7 @@ namespace CR::Platform {
 	  public:
 		SharedLibrary() = default;
 		SharedLibrary(const char* a_libraryName);
-		~SharedLibrary() noexcept;
+		~SharedLibrary();
 		SharedLibrary(const SharedLibrary&) = delete;
 		SharedLibrary& operator=(const SharedLibrary&) = delete;
 		SharedLibrary(SharedLibrary&& a_other) noexcept;

@@ -45,7 +45,7 @@ PipeClient::~PipeClient() {
 	if(!m_data) { return; }
 	m_data->m_closed.store(true, std::memory_order_release);
 	CloseHandle(m_data->m_pipeHandle);
-	if(m_data->m_msgThread.joinable()) m_data->m_msgThread.join();
+	if(m_data->m_msgThread.joinable()) { m_data->m_msgThread.join(); }
 	CloseHandle(m_data->m_writeEvent);
 }
 
@@ -68,8 +68,9 @@ void PipeClient::SendPipeMessage(const void* a_msg, size_t a_msgSize) {
 	    WriteFile(m_data->m_pipeHandle, a_msg, static_cast<DWORD>(a_msgSize), nullptr, &m_data->m_writeOverlapped);
 	auto error = GetLastError();
 	if(!result && error == ERROR_IO_PENDING) {
-		if(GetOverlappedResult(m_data->m_pipeHandle, &m_data->m_writeOverlapped, &bytesWritten, TRUE) == 0)
+		if(GetOverlappedResult(m_data->m_pipeHandle, &m_data->m_writeOverlapped, &bytesWritten, TRUE) == 0) {
 			Core::Log::Error("Failed to write message");
+		}
 	}
 }
 
@@ -85,8 +86,9 @@ void PipeClient::RunMsgHandler() {
 		auto result = ReadFile(m_data->m_pipeHandle, msg, static_cast<DWORD>(4_Kb), nullptr, &overlapped);
 		auto error  = GetLastError();
 		if(!result && error == ERROR_IO_PENDING) {
-			if(GetOverlappedResult(m_data->m_pipeHandle, &overlapped, &bytesRead, TRUE) != 0)
+			if(GetOverlappedResult(m_data->m_pipeHandle, &overlapped, &bytesRead, TRUE) != 0) {
 				m_data->m_msgHandler(msg, bytesRead);
+			}
 		}
 	}
 }

@@ -8,13 +8,15 @@ using namespace CR::Platform;
 
 namespace {
 	// Doesn't scale past one thread at the moment. would require some redesign to do so.
-	class IOCPThread {
+	class IOCPThread final {
 	  public:
 		void RegisterIOCPPort(IOCPPort* a_port, HANDLE a_handle);
 		IOCPThread();
 		~IOCPThread();
 		IOCPThread(const IOCPThread&) = delete;
 		IOCPThread& operator=(const IOCPThread&) = delete;
+		IOCPThread(IOCPThread&&)                 = delete;
+		IOCPThread& operator=(IOCPThread&&) = delete;
 
 		void RunIOCPThread();
 
@@ -36,20 +38,20 @@ IOCPPort::IOCPPort(HANDLE a_handle, CompletionCallback_t a_completion) : m_compl
 }
 
 IOCPThread::IOCPThread() {
-	m_iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 1);
+	m_iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 1);
 	m_iocpThread = std::thread{[this]() { this->RunIOCPThread(); }};
 }
 
 IOCPThread::~IOCPThread() {
 	CloseHandle(m_iocpHandle);
-	if(m_iocpThread.joinable()) m_iocpThread.join();
+	if(m_iocpThread.joinable()) { m_iocpThread.join(); }
 }
 
 void IOCPThread::RunIOCPThread() {
 	DWORD msgSize;
 	ULONG_PTR completionKey;
 	OVERLAPPED* msg;
-	while(GetQueuedCompletionStatus(m_iocpHandle, &msgSize, &completionKey, &msg, INFINITE)) {
+	while((bool)GetQueuedCompletionStatus(m_iocpHandle, &msgSize, &completionKey, &msg, INFINITE)) {
 		((IOCPPort*)completionKey)->RunContinuation(msg, msgSize);
 	}
 }

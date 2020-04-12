@@ -16,8 +16,6 @@ namespace CR::Platform {
 	};
 }    // namespace CR::Platform
 
-MemoryMappedFile::MemoryMappedFile() {}
-
 MemoryMappedFile::MemoryMappedFile(const std::filesystem::path& a_filePath) {
 	auto handle = CreateFileW(a_filePath.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	Core::Log::Require(handle != INVALID_HANDLE_VALUE, "Could not open file {}", a_filePath.string());
