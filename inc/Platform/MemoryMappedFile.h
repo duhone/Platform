@@ -7,7 +7,7 @@
 namespace CR::Platform {
 	class MemoryMappedFile final {
 	  public:
-		MemoryMappedFile() = default;
+		MemoryMappedFile();
 		MemoryMappedFile(const std::filesystem::path& a_filePath);
 		~MemoryMappedFile();
 		MemoryMappedFile(const MemoryMappedFile&) = delete;
@@ -16,9 +16,9 @@ namespace CR::Platform {
 		MemoryMappedFile& operator                           =(MemoryMappedFile&& a_other) noexcept;
 
 		// follow stl naming convention for compatibility with non member data/size
-		std::size_t size() const noexcept;
-		std::byte* data() noexcept;
-		const std::byte* data() const noexcept;
+		[[nodiscard]] std::size_t size() const noexcept;
+		[[nodiscard]] std::byte* data() noexcept;
+		[[nodiscard]] const std::byte* data() const noexcept;
 
 	  private:
 		std::unique_ptr<struct MemoryMappedFileData> m_fileData;
