@@ -53,12 +53,17 @@ MemoryMappedFile& MemoryMappedFile::operator=(MemoryMappedFile&& a_other) noexce
 	return *this;
 }
 
-std::size_t MemoryMappedFile::size() noexcept {
+std::size_t MemoryMappedFile::size() const noexcept {
 	if(!m_fileData) { return 0; }
 	return m_fileData->m_fileSize;
 }
 
 std::byte* MemoryMappedFile::data() noexcept {
+	if(!m_fileData) { return nullptr; }
+	return m_fileData->m_data;
+}
+
+const std::byte* MemoryMappedFile::data() const noexcept {
 	if(!m_fileData) { return nullptr; }
 	return m_fileData->m_data;
 }

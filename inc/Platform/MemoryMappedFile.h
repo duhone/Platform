@@ -16,8 +16,9 @@ namespace CR::Platform {
 		MemoryMappedFile& operator                           =(MemoryMappedFile&& a_other) noexcept;
 
 		// follow stl naming convention for compatibility with non member data/size
-		std::size_t size() noexcept;
+		std::size_t size() const noexcept;
 		std::byte* data() noexcept;
+		const std::byte* data() const noexcept;
 
 	  private:
 		std::unique_ptr<struct MemoryMappedFileData> m_fileData;
