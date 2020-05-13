@@ -41,7 +41,8 @@ add_library(platform OBJECT
   ${BUILD}
 )
 		
-settingsCR(platform)	
+settingsCR(platform)		
+createPCH(platform)	
 				
 target_include_directories(platform PUBLIC "${root}/inc")
 target_link_libraries(platform PUBLIC
@@ -68,7 +69,8 @@ set(BUILD
 )
 
 add_executable(platform_tests 
-					${SRCS})
+					${SRCS})		
+createPCH(platform_tests)	
 						
 target_link_libraries(platform_tests 
 	doctest
