@@ -35,14 +35,14 @@ set(BUILD
     ${root}/build/build.cmake
 )
 
-add_library(platform OBJECT  
+add_library(platform  
   ${PUBLIC_HDRS} 
   ${SRCS} 
   ${BUILD}
 )
 		
-settingsCR(platform)		
-createPCH(platform)	
+settingsCR(platform)	
+usePCH(platform core)
 				
 target_include_directories(platform PUBLIC "${root}/inc")
 target_link_libraries(platform PUBLIC
@@ -69,8 +69,8 @@ set(BUILD
 )
 
 add_executable(platform_tests 
-					${SRCS})		
-createPCH(platform_tests)	
+					${SRCS})
+usePCH(platform_tests core)
 						
 target_link_libraries(platform_tests 
 	doctest
